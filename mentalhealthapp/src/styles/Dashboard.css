@@ -1,0 +1,76 @@
+.dashboard-container {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 20px;
+    background: #1e1e1e;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.2);
+    text-align: center;
+    color: white;
+}
+
+.user-info p {
+    background: #333;
+    padding: 10px;
+    border-radius: 5px;
+    margin: 10px 0;
+}
+
+.services-heading {
+    margin-top: 30px;
+    font-size: 1.5em;
+    color: #f1c40f;
+}
+
+.services-menu {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.service-card {
+    background: #333;
+    padding: 15px;
+    border-radius: 8px;
+    width: 45%;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.service-card:hover {
+    background: #444;
+    transform: scale(1.05);
+}
+
+.service-card h4 {
+    color: #f39c12;
+    margin-bottom: 5px;
+}
+.dashboard-wrapper {
+    position: relative;
+    padding-top: 20px;
+}
+
+.logout-button-container {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.logout-button {
+    padding: 6px 14px;
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: auto;
+}
+
+.logout-button:hover {
+    background-color: #c82333;
+}

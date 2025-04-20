@@ -1,0 +1,130 @@
+version: '3.8'
+
+services:
+  mysql-db:
+    image: mysql:8
+    container_name: mysql_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: mindnotes_db
+      MYSQL_USER: kanan
+      MYSQL_PASSWORD: k30g08Y@02
+    ports:
+      - "3306:3306"
+    networks:
+      - mindnotes_network
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  login-service:
+    build:
+      context: ./login_service
+      dockerfile: Dockerfile
+    container_name: login_service
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/mindnotes_db?createDatabaseIfNotExist=true
+      SPRING_DATASOURCE_USERNAME: kanan
+      SPRING_DATASOURCE_PASSWORD: k30g08Y@02
+    ports:
+      - "9090:9090"
+    networks:
+      - mindnotes_network
+
+  self-discovery-service:
+    build:
+      context: ./self_discovery_service
+      dockerfile: Dockerfile
+    container_name: self_discovery_service
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/mindnotes_db?createDatabaseIfNotExist=true
+      SPRING_DATASOURCE_USERNAME: kanan
+      SPRING_DATASOURCE_PASSWORD: k30g08Y@02
+    ports:
+      - "9091:9091"
+    networks:
+      - mindnotes_network
+
+  coping-with-crisis-service:
+    build:
+      context: ./Coping_with_services
+      dockerfile: Dockerfile
+    container_name: coping_with_services
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/mindnotes_db?createDatabaseIfNotExist=true
+      SPRING_DATASOURCE_USERNAME: kanan
+      SPRING_DATASOURCE_PASSWORD: k30g08Y@02
+    ports:
+      - "9092:9092"
+    networks:
+      - mindnotes_network
+
+  self-help-service:
+    build:
+      context: ./selfHelp
+      dockerfile: Dockerfile
+    container_name: self_help_service
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/mindnotes_db?createDatabaseIfNotExist=true
+      SPRING_DATASOURCE_USERNAME: kanan
+      SPRING_DATASOURCE_PASSWORD: k30g08Y@02
+    ports:
+      - "9093:9093"
+    networks:
+      - mindnotes_network
+
+  letter-service:
+    build:
+      context: ./letters_Service
+      dockerfile: Dockerfile
+    container_name: letter_service
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/mindnotes_db?createDatabaseIfNotExist=true
+      SPRING_DATASOURCE_USERNAME: kanan
+      SPRING_DATASOURCE_PASSWORD: k30g08Y@02
+    ports:
+      - "9095:9095"
+    networks:
+      - mindnotes_network
+
+  frontend:
+    build:
+      context: ./mentalhealthapp
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - login-service
+      - self-discovery-service
+      - letter-service
+    networks:
+      - mindnotes_network
+
+networks:
+  mindnotes_network:
+
+volumes:
+  mysql_data:
+

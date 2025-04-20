@@ -1,0 +1,249 @@
+/* General page styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+    margin: 0;
+    padding: 0;
+  }
+  
+  h2, h3 {
+    color: #343a40;
+  }
+  
+  /* Container for the whole page */
+  .letters-container {
+    max-width: 800px;
+    margin: 30px auto;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Letter Form Styles */
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  input[type="text"],
+  input[type="date"],
+  textarea {
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    resize: none;
+  }
+  
+  textarea {
+    min-height: 80px;
+  }
+  
+  button {
+    padding: 10px;
+    font-size: 1rem;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  
+  button:hover {
+    background-color: #0056b3;
+  }
+  
+  /* Letter Card Styles */
+  .letter-card {
+    background-color: #f1f1f1;
+    border-left: 5px solid #007bff;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+  }
+  
+  .letter-card h4 {
+    margin: 0 0 5px;
+    color: #212529;
+  }
+  
+  .letter-card p {
+    margin: 5px 0;
+    color: #495057;
+  }
+  
+  /* Category Filter */
+  .category-filter {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .category-filter input {
+    flex-grow: 1;
+  }
+  .letter-carousel-card {
+    background-color: #f1f1f1;
+    padding: 20px;
+    border-radius: 12px;
+    border-left: 5px solid #007bff;
+    margin: 0 20px;
+    min-height: 250px;
+  }
+  .letters-container {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  }
+  
+  h2, h3 {
+    color: #343a40;
+    font-weight: 600;
+  }
+  
+  .category-filter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 25px;
+  }
+  
+  .category-filter select {
+    flex: 1;
+    padding: 10px;
+    font-size: 1rem;
+    border-radius: 8px;
+  }
+  
+  .category-filter button {
+    padding: 10px 16px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  
+  .category-filter button:hover {
+    background-color: #0056b3;
+  }
+  
+  .letter-card {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-left: 6px solid #007bff;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    transition: transform 0.2s ease;
+  }
+  
+  .letter-card:hover {
+    transform: scale(1.01);
+  }
+  
+  .letter-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .letter-card h4 {
+    margin: 0;
+    color: #212529;
+    font-weight: 600;
+  }
+  
+  .letter-date {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-bottom: 10px;
+  }
+  
+  .letters-container {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 40px;
+    background-color: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.08);
+  }
+  
+  /* Headings */
+  h2, h3 {
+    color: #343a40;
+    font-weight: 600;
+    margin-bottom: 24px;
+  }
+  
+  /* Category Filter */
+  .category-filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 30px;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .category-filter select {
+    flex-grow: 1;
+    min-width: 250px;
+    padding: 12px;
+    font-size: 1rem;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+  }
+  
+  .category-filter button {
+    padding: 12px 20px;
+    font-size: 1rem;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .category-filter button:hover {
+    background-color: #0056b3;
+  }
+  
+  /* Letter Card Styles */
+  .letter-card {
+    background-color: #f9f9f9;
+    padding: 20px 24px;
+    border-left: 6px solid #007bff;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    transition: transform 0.2s ease;
+  }
+  
+  .letter-card:hover {
+    transform: translateY(-2px);
+  }
+  
+  .letter-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .letter-card h4 {
+    margin: 0;
+    color: #212529;
+    font-weight: 600;
+  }
+  
+  .letter-date {
+    font-size: 0.95rem;
+    color: #6c757d;
+    margin-bottom: 10px;
+  }
+  

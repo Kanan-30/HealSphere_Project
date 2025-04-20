@@ -1,0 +1,6 @@
+# Ignore Docker volumes
+**/node_modules
+**/target
+**/*.log
+docker-compose.override.yml
+
