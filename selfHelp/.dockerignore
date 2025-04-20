@@ -1,0 +1,24 @@
+# Maven target output
+target
+
+# Logs
+*.log
+
+# IDE/Editor stuff
+.vscode
+.idea
+
+# Git
+.git
+.gitignore
+
+# Environment files
+.env
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Optional: OS-specific
+*.swp
+
