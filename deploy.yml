@@ -4,7 +4,7 @@
   become: false
 
   vars:
-  project_path: "{{ lookup('env', 'WORKSPACE') }}"
+    project_path: "{{ lookup('env', 'WORKSPACE') }}"
 
   tasks:
     - name: Install Docker SDK for Python
@@ -17,12 +17,12 @@
         name: docker
         state: started
 
-    - name: Pull Latest Images
+    - name: Pull Latest Docker Images
       shell: docker compose pull
       args:
-        chdir: "{{ project_path }}"
+        chdir: "{{ project_path }}"  # Use project_path dynamically
 
     - name: Recreate and Start Containers
       shell: docker compose up -d --remove-orphans
       args:
-        chdir: "{{ project_path }}"
+        chdir: "{{ project_path }}"  # Use project_path dynamically
