@@ -3,6 +3,9 @@
   hosts: localhost
   become: false
 
+  vars:
+  project_path: "{{ lookup('env', 'WORKSPACE') }}"
+
   tasks:
     - name: Install Docker SDK for Python
       pip:
@@ -15,11 +18,11 @@
         state: started
 
     - name: Pull Latest Images
-      shell: docker-compose pull
+      shell: docker compose pull
       args:
-        chdir: /home/jenkins/HealSphere_Project  # change if needed
+        chdir: "{{ project_path }}"
 
     - name: Recreate and Start Containers
-      shell: docker-compose up -d --remove-orphans
+      shell: docker compose up -d --remove-orphans
       args:
-        chdir: /home/jenkins/HealSphere_Project  # change if needed
+        chdir: "{{ project_path }}"
