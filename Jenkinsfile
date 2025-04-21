@@ -30,12 +30,21 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('', 'DockerHubCred') {
-                        def services = ['login_service', 'self_discovery_service', 'coping_with_services', 'self_help_service', 'letter_service', 'frontend']
-                        for (svc in services) {
-                            def imageName = "${DOCKER_HUB_USER}/${svc}"
-                            sh "docker tag ${svc} ${imageName}:${IMAGE_TAG}"
-                            sh "docker push ${imageName}:${IMAGE_TAG}"
+                        def images = [
+                          'healsphere-login-service': 'login_service',
+                          'healsphere-self-discovery-service': 'self_discovery_service',
+                          'healsphere-coping-with-crisis-service': 'coping_with_services',
+                          'healsphere-self-help-service': 'self_help_service',
+                          'healsphere-letter-service': 'letter_service',
+                          'healsphere-frontend': 'frontend'
+                        ]
+                        
+                        for (actualImage in images.keySet()) {
+                          def dockerHubName = "${DOCKER_HUB_USER}/${images[actualImage]}"
+                          sh "docker tag ${actualImage}:latest ${dockerHubName}:${IMAGE_TAG}"
+                          sh "docker push ${dockerHubName}:${IMAGE_TAG}"
                         }
+
                     }
                 }
             }
