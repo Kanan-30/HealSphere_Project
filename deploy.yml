@@ -1,19 +1,25 @@
 ---
 - name: Deploy HealSphere App using Docker Compose
   hosts: localhost
-  become: false
+  become: true  # Ensure you have the necessary privileges to stop the MySQL service
 
   vars:
     project_path: "{{ lookup('env', 'WORKSPACE') }}"
 
   tasks:
+    - name: Stop MySQL service if running
+      ansible.builtin.service:
+        name: mysql
+        state: stopped
+      ignore_errors: yes  # Continue even if MySQL is not running
+
     - name: Install Docker SDK for Python
       pip:
         name: docker
         executable: pip3
 
     - name: Ensure Docker is running
-      service:
+      ansible.builtin.service:
         name: docker
         state: started
 
