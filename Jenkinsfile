@@ -21,7 +21,7 @@ pipeline {
         stage('Build Microservices') {
             steps {
                 script {
-                    sh 'docker-compose build'
+                    sh 'docker compose build'
                 }
             }
         }
