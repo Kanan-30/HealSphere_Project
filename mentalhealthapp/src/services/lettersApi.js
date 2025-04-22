@@ -1,7 +1,7 @@
 import axios from "axios";
 import { getToken } from "../auth";
 
-const BASE_URL = 'http://localhost:9095/api';
+const BASE_URL = '/api/letter/api';
 
 const headers = () => ({
   Authorization: `Bearer ${getToken()}`

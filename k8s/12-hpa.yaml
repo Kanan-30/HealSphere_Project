@@ -1,0 +1,113 @@
+# File: 12-hpa.yaml
+# Defines Horizontal Pod Autoscalers for the backend microservices
+# Requires the Kubernetes Metrics Server to be installed and running.
+
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: login-service-hpa
+  namespace: mindnotes
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    # Make sure this matches the 'metadata.name' in 04-login-service-deployment.yaml
+    name: login-service-deployment
+  minReplicas: 1
+  maxReplicas: 5 # Adjust max replicas as needed
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70 # Target CPU utilization percentage
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: self-discovery-service-hpa
+  namespace: mindnotes
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    # Make sure this matches the 'metadata.name' in 05-self-discovery-service-deployment.yaml
+    name: self-discovery-service-deployment
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: coping-with-crisis-service-hpa # Consistent naming
+  namespace: mindnotes
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    # Make sure this matches the 'metadata.name' in 06-coping-service-deployment.yaml (or similar)
+    # Adjust this name if you named your deployment differently
+    name: coping-with-crisis-service-deployment
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: self-help-service-hpa
+  namespace: mindnotes
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    # Make sure this matches the 'metadata.name' in 07-self-help-service-deployment.yaml
+    name: self-help-service-deployment
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: letter-service-hpa
+  namespace: mindnotes
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    # Make sure this matches the 'metadata.name' in 08-letter-service-deployment.yaml
+    name: letter-service-deployment
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70

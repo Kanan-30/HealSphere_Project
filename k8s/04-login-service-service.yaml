@@ -1,0 +1,15 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: login-service # Service name for internal communication/Ingress target
+  namespace: mindnotes
+  labels:
+    app: login-service
+spec:
+  ports:
+  - port: 80 # Service listens on port 80 (or another port like 9090)
+    targetPort: 9090 # Forward traffic to the container's port 9090
+  selector:
+    app: login-service
+  type: ClusterIP # Only reachable within the cluster or via Ingress

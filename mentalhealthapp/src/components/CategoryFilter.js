@@ -10,7 +10,7 @@ const CategoryFilter = ({ setLetters }) => {
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("");
 
-  const BASE_URL = 'http://localhost:9095/api';
+  const BASE_URL = '/api/letter/api';
 
   const fetchCategories = async () => {
     try {

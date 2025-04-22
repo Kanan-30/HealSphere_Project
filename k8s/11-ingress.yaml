@@ -1,0 +1,57 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mindnotes-ingress
+  namespace: mindnotes
+  annotations:
+    # Use nginx ingress controller specific annotations if needed
+    # Example: nginx.ingress.kubernetes.io/rewrite-target: /$2
+    # Basic setup assumes paths are handled correctly by backend services
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m" # Example: Allow larger request bodies if needed
+spec:
+  # ingressClassName: nginx # Uncomment and set if you have multiple ingress controllers or specific class names
+  rules:
+  - http: # Add 'host: yourdomain.com' here if you have one
+      paths:
+      - path: /api/login # Path prefix for login service API calls
+        pathType: Prefix
+        backend:
+          service:
+            name: login-service
+            port:
+              number: 80 # Port defined in the login-service Service
+      - path: /api/discovery # Path prefix for self-discovery service
+        pathType: Prefix
+        backend:
+          service:
+            name: self-discovery-service
+            port:
+              number: 80 # Port defined in its Service
+      - path: /api/coping # Path prefix for coping service
+        pathType: Prefix
+        backend:
+          service:
+            name: coping-with-crisis-service # Use the k8s service name
+            port:
+              number: 80 # Port defined in its Service
+      - path: /api/help # Path prefix for self-help service
+        pathType: Prefix
+        backend:
+          service:
+            name: self-help-service
+            port:
+              number: 80 # Port defined in its Service
+      - path: /api/letter # Path prefix for letter service
+        pathType: Prefix
+        backend:
+          service:
+            name: letter-service
+            port:
+              number: 80 # Port defined in its Service
+      - path: / # Catch-all for the frontend
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend-service
+            port:
+              number: 80 # Port defined in the frontend Service

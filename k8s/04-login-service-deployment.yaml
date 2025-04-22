@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: login-service-deployment
+  namespace: mindnotes
+  labels:
+    app: login-service
+spec:
+  replicas: 1 # Start with 1, HPA will manage this later
+  selector:
+    matchLabels:
+      app: login-service
+  template:
+    metadata:
+      labels:
+        app: login-service
+    spec:
+      containers:
+      - name: login-service
+        image: kanang/login-service:latest # Replace with your image
+        ports:
+        - containerPort: 9090 # The port the app listens on INSIDE the container
+        env:
+        - name: SPRING_DATASOURCE_URL
+          value: "jdbc:mysql://mysql-db:3306/mindnotes_db?createDatabaseIfNotExist=true" # Use the k8s service name 'mysql-db'
+        - name: SPRING_DATASOURCE_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secrets
+              key: MYSQL_USER
+        - name: SPRING_DATASOURCE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secrets
+              key: MYSQL_PASSWORD
+        # Add Liveness and Readiness Probes (Essential for reliable deployments & HPA)
+        # Assuming Spring Boot Actuator is enabled (/actuator/health)
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness # Or just /actuator/health if simpler
+            port: 9090
+          initialDelaySeconds: 30 # Give time for Spring Boot to start
+          periodSeconds: 10
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness # Or just /actuator/health
+            port: 9090
+          initialDelaySeconds: 60
+          periodSeconds: 15
+          failureThreshold: 3
+

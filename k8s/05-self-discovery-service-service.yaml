@@ -1,0 +1,15 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: self-discovery-service # Service name for internal communication/Ingress target
+  namespace: mindnotes
+  labels:
+    app: self-discovery-service
+spec:
+  ports:
+  - port: 80 # Service listens on port 80 (or another port like 9090)
+    targetPort: 9091 # Forward traffic to the container's port 9090
+  selector:
+    app: self-discovery-service
+  type: ClusterIP # Only reachable within the cluster or via Ingress

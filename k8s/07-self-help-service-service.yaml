@@ -1,0 +1,15 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: self-help-service # Service name for internal communication/Ingress target
+  namespace: mindnotes
+  labels:
+    app: self-help-service
+spec:
+  ports:
+  - port: 80 # Service listens on port 80 (or another port like 9090)
+    targetPort: 9093 # Forward traffic to the container's port 9090
+  selector:
+    app: self-help-service
+  type: ClusterIP # Only r`eachable within the cluster or via Ingress
