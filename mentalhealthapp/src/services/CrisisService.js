@@ -1,5 +1,7 @@
 import axios from 'axios';
 
+//const BASE_URL = 'http://localhost:9092/api';
+
 const BASE_URL = '/api/coping/api';
 
 export const fetchCrisisDescriptions = async (token) => {

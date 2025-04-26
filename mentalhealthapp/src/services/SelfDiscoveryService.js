@@ -41,6 +41,8 @@ import axios from 'axios';
 
 // const BASE_URL = process.env.REACT_APP_DISCOVERY_API;
 
+//const BASE_URL = 'http://localhost:9091/api/self-discovery';
+
 const BASE_URL = '/api/discovery/api/self-discovery';
 
 export const getQuestions = (step, token) =>

@@ -31,38 +31,46 @@
 //        chain.doFilter(request, response);
 //    }
 //}
-package org.example.login_Service.helper; // Ensure this matches your package structure
+package org.example.letters_service.helper;
 
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.security.SignatureException;
+// Import JwtUtil from the 'config' package
+import org.example.letters_service.config.JwtUtil;
+// Import UserDetailsService implementation (assuming it's in 'service' package)
+import org.example.letters_service.service.UserDetailsServiceImpl;
+
+// Necessary imports from Jakarta, Spring Security, Lombok, SLF4J, JWT library etc.
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger; // Use SLF4J for logging
-import org.slf4j.LoggerFactory; // Use SLF4J for logging
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService; // Import this
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.security.SignatureException; // Ensure this is imported if caught below
 
 import java.io.IOException;
+// Removed unused import: import java.util.ArrayList; (if not used elsewhere)
+
 
 @Component
-@RequiredArgsConstructor // Use Lombok for constructor injection
+@RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private static final Logger log = LoggerFactory.getLogger(JwtAuthenticationFilter.class); // Setup logger
+    private static final Logger log = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
+    // Inject dependencies
     private final JwtUtil jwtUtil;
-    // Inject the UserDetailsService (likely implemented by your UserService)
     private final UserDetailsService userDetailsService;
 
     @Override
@@ -74,64 +82,65 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
-        final String userEmail;
+        final String userEmail; // Using 'userEmail' as variable name, matches logic
 
-        // If Authorization header is missing or doesn't start with "Bearer ", pass request down the chain
+        // 1. Check for Bearer token
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // Extract the JWT token (remove "Bearer ")
+        // 2. Extract token
         jwt = authHeader.substring(7);
 
         try {
-            // Extract email (or subject) from the token
-            userEmail = jwtUtil.extractEmail(jwt);
+            // 3. Extract username (email) from token
+            userEmail = jwtUtil.extractUsername(jwt); // Assuming extractUsername gives the email
 
-            // If email is present and user is not already authenticated in the current security context
+            // 4. Check if username exists and user is not already authenticated
             if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-                // Load user details from the database using the email from the token
+                // 5. Load UserDetails from database
                 UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
 
-                // Validate the token using the method signature from your JwtUtil
-                // *** THIS IS THE CORRECTED LINE ***
-                if (jwtUtil.isTokenValid(jwt)) {
-                    // If token is valid, create an authentication token
+                // 6. *** CORRECTED LINE ***
+                // Validate the token using the actual method from JwtUtil.java
+                if (jwtUtil.validateToken(jwt)) {
+                    // 7. If token is valid, create authentication object
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                            userDetails,          // Principal: The user details object
-                            null,                 // Credentials: Null for JWT authentication
-                            userDetails.getAuthorities() // Authorities: User's roles/permissions
+                            userDetails,          // Principal
+                            null,                 // Credentials (not needed for JWT)
+                            userDetails.getAuthorities() // Authorities
                     );
-                    // Set additional details for the authentication token (e.g., IP address)
+                    // 8. Set details
                     authToken.setDetails(
                             new WebAuthenticationDetailsSource().buildDetails(request)
                     );
-                    // Update the SecurityContextHolder with the new authentication object
-                    // This marks the current user as authenticated for the duration of the request
+                    // 9. Update SecurityContextHolder - Authenticate the user for this request
                     SecurityContextHolder.getContext().setAuthentication(authToken);
-                    log.debug("Successfully authenticated user '{}' via JWT.", userEmail); // Added debug log
+                    log.debug("Successfully authenticated user '{}' via JWT.", userEmail);
                 } else {
-                    log.warn("JWT token is invalid according to JwtUtil for user '{}'.", userEmail); // Updated log message
+                    // This branch might be less likely if validateToken catches expiration/signature errors
+                    log.warn("JWT token failed validation according to JwtUtil for user '{}'.", userEmail);
                 }
             }
         } catch (ExpiredJwtException e) {
             log.warn("JWT token is expired: {}", e.getMessage());
-            // Optionally: set a specific response status or header for expired tokens
+            // Consider setting response status to 401 Unauthorized here if needed
             // response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            // response.getWriter().write("JWT Token Expired");
-            // return; // Exit filter chain early if needed
         } catch (SignatureException | MalformedJwtException e) {
+            // Catch specific JWT errors if needed (ensure SignatureException is imported)
             log.warn("JWT token signature or format is invalid: {}", e.getMessage());
+            // Consider setting response status to 401 Unauthorized here if needed
         } catch (UsernameNotFoundException e) {
+            // This happens if loadUserByUsername fails
             log.warn("User details not found for email extracted from JWT: {}", e.getMessage());
         } catch (Exception e) {
+            // Catch-all for other potential errors during JWT processing or authentication setup
             log.error("Could not set user authentication in security context", e);
         }
 
-        // Continue the filter chain regardless of authentication success/failure
-        // (unless you explicitly stopped it above, e.g., for expired tokens)
+        // 10. Continue the filter chain
         filterChain.doFilter(request, response);
     }
 }

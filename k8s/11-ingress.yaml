@@ -4,54 +4,69 @@ metadata:
   name: mindnotes-ingress
   namespace: mindnotes
   annotations:
-    # Use nginx ingress controller specific annotations if needed
-    # Example: nginx.ingress.kubernetes.io/rewrite-target: /$2
-    # Basic setup assumes paths are handled correctly by backend services
-    nginx.ingress.kubernetes.io/proxy-body-size: "10m" # Example: Allow larger request bodies if needed
+    # Enable regex and capture groups in paths
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    # IMPORTANT: Define the rewrite rule.
+    # For paths matching /api/service(/|$)(.*), this sends /$2 to the backend.
+    # $1 captures the potential trailing slash, $2 captures everything after it.
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    # --- Other annotations ---
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
 spec:
-  # ingressClassName: nginx # Uncomment and set if you have multiple ingress controllers or specific class names
+  ingressClassName: nginx # Uncomment and ensure this matches your installed Ingress Controller class if necessary
   rules:
   - http: # Add 'host: yourdomain.com' here if you have one
       paths:
-      - path: /api/login # Path prefix for login service API calls
-        pathType: Prefix
+      # === Backend Service Paths with Rewrite ===
+      # Match /api/login, /api/login/, or /api/login/anything...
+      # Capture the part after /api/login/ (or capture nothing if it's just /api/login)
+      - path: /api/login(/|$)(.*)
+        pathType: Prefix # Works with use-regex: "true" for Nginx Ingress
         backend:
           service:
             name: login-service
             port:
-              number: 80 # Port defined in the login-service Service
-      - path: /api/discovery # Path prefix for self-discovery service
+              number: 80
+      - path: /api/discovery(/|$)(.*)
         pathType: Prefix
         backend:
           service:
             name: self-discovery-service
             port:
-              number: 80 # Port defined in its Service
-      - path: /api/coping # Path prefix for coping service
+              number: 80
+      - path: /api/coping(/|$)(.*)
         pathType: Prefix
         backend:
           service:
-            name: coping-with-crisis-service # Use the k8s service name
+            name: coping-with-crisis-service
             port:
-              number: 80 # Port defined in its Service
-      - path: /api/help # Path prefix for self-help service
+              number: 80
+      - path: /api/help(/|$)(.*)
         pathType: Prefix
         backend:
           service:
             name: self-help-service
             port:
-              number: 80 # Port defined in its Service
-      - path: /api/letter # Path prefix for letter service
+              number: 80
+      - path: /api/letter(/|$)(.*)
         pathType: Prefix
         backend:
           service:
             name: letter-service
             port:
-              number: 80 # Port defined in its Service
-      - path: / # Catch-all for the frontend
+              number: 80
+
+      # === Frontend Path (No Rewrite Needed) ===
+      # This rule MUST come AFTER the more specific /api/* rules.
+      # The rewrite annotation above does NOT apply directly here because the path regex
+      # used in the rewrite target (/api/service(/|$)(.*)) won't match "/".
+      - path: /()(.*) # Match the root path using a similar regex structure but capturing everything
         pathType: Prefix
         backend:
           service:
             name: frontend-service
             port:
-              number: 80 # Port defined in the frontend Service
+              number: 80
+        # Note: Because the main rewrite target uses $2 from the *matched* path's regex,
+        # when "/" is matched by /()(.*), $2 will contain the original path "/",
+        # effectively sending "/" to the frontend, which is usually correct.

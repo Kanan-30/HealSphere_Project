@@ -36,7 +36,7 @@ public class CrisisController {
 
     private Long getUserIdFromToken(String authHeader) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            throw new RuntimeException("Missing or invalid Authorization header");
+            throw new RuntimeException("Missing or Invalid Authorization Header");
         }
 
         String token = authHeader.substring(7); // Remove "Bearer " prefix

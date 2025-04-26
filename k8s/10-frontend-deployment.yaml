@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: kanang/frontend:latest # Replace with your image
+        image: khushi2912/frontend:latest # Replace with your image
         ports:
         - containerPort: 80 # Nginx listens on port 80 inside the container
         readinessProbe:

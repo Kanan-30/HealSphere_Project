@@ -22,4 +22,3 @@ INSERT INTO letters (category, content, date, heading) VALUES
  'Hi Love,\n\nYou’re not broken. You’re becoming. These cracks let the light in. Allow yourself to feel, to grow, to rest. You owe no one perfection—only your presence.\n\nLovingly,\nSomeone Who Cares',
  '2025-04-17',
  'You’re Becoming, Not Broken');
-

@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: self-discovery-service
-        image: kanang/self-discovery-service:latest
+        image: khushi2912/self-discovery-service:latest
         ports:
         - containerPort: 9091 # The port the app listens on INSIDE the container
         env:
@@ -37,14 +37,14 @@ spec:
         # Assuming Spring Boot Actuator is enabled (/actuator/health)
         readinessProbe:
           httpGet:
-            path: /actuator/health/readiness # Or just /actuator/health if simpler
+            path: /actuator/health # Or just /actuator/health if simpler
             port: 9091
           initialDelaySeconds: 30 # Give time for Spring Boot to start
           periodSeconds: 10
           failureThreshold: 3
         livenessProbe:
           httpGet:
-            path: /actuator/health/liveness # Or just /actuator/health
+            path: /actuator/health # Or just /actuator/health
             port: 9091
           initialDelaySeconds: 60
           periodSeconds: 15

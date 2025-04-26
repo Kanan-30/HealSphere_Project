@@ -1,5 +1,7 @@
 import axios from 'axios';
 
+//const BASE_URL = 'http://localhost:9093/api/selfhelp';
+
 const BASE_URL = '/api/help/api/selfhelp';
 
 export const getToolkits = (token) =>

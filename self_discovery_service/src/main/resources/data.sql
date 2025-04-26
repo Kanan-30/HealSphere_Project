@@ -41,5 +41,3 @@ INSERT INTO reports (question_id, report_text, selected_option) VALUES
 (4, 'There’s a slight impact. Early intervention can make a difference.', 'Slightly'),
 (4, 'It’s affecting you moderately. Let’s discuss ways to regain balance.', 'Moderately'),
 (4, 'This has a severe impact. Seeking support could bring relief.', 'Severely');
-
-
