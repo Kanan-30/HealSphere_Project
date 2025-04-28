@@ -1,0 +1,26 @@
+---
+- name: Deploy HealSphere App to Kubernetes
+  hosts: localhost # Target localhost defined in inventory-k8s
+  gather_facts: false # Not needed for K8s tasks
+  connection: local  # Use local connection
+
+  # These vars will be overridden by -e from Jenkins if provided
+  vars:
+    k8s_manifest_path: "{{ lookup('env', 'WORKSPACE') }}/MIndNotes/k8s" # Default path relative to workspace - Jenkins should pass absolute path
+    k8s_namespace: "mindnotes" # Default namespace
+
+  tasks:
+    # --- Task using kubectl command to apply manifests ---
+    - name: Apply all K8s manifests using kubectl
+      ansible.builtin.command:
+        # Use kubectl apply -k if you have a kustomization.yaml
+        # Use kubectl apply -f for applying a directory of yaml files
+        cmd: "kubectl apply -n {{ k8s_namespace }} -f {{ k8s_manifest_path }}"
+      register: kubectl_apply_result
+      changed_when: "'configured' in kubectl_apply_result.stdout or 'created' in kubectl_apply_result.stdout"
+      failed_when: kubectl_apply_result.rc != 0
+
+    - name: Show kubectl apply results
+      ansible.builtin.debug:
+        var: kubectl_apply_result.stdout_lines
+        verbosity: 1 # Show only if -v is used
