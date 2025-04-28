@@ -1,19 +1,27 @@
 pipeline {
-    agent any
+    agent any // Ensure this agent has Docker, kubectl, Ansible, and k8s collection installed
 
     triggers {
         githubPush()
     }
 
     environment {
+        // IMPORTANT: Use the Docker Hub user specified in your K8s manifests
         DOCKER_HUB_USER = 'kanang'
-        REPO_NAME = 'healsphere_project'
+        // REPO_NAME seems unused now, but keeping if needed elsewhere
+        // REPO_NAME = 'healsphere_project'
         IMAGE_TAG = 'latest'
+        // Define the Kubernetes namespace used in your manifests
+        K8S_NAMESPACE = 'mindnotes'
+        // Define the path to your K8s manifests within the repo checkout
+        K8S_MANIFEST_PATH = 'k8s' // Adjusted based on your 'tree' output
     }
 
     stages {
         stage('Checkout') {
             steps {
+                // Assuming Jenkinsfile is at the root of the repo, adjust path if needed
+                // If Jenkinsfile is inside MIndNotes, checkout '.'
                 git branch: 'main', url: 'https://github.com/Kanan-30/HealSphere_Project.git'
             }
         }
@@ -21,7 +29,22 @@ pipeline {
         stage('Build Microservices') {
             steps {
                 script {
-                    sh 'docker compose build'
+                    // Map service names (as used in k8s/dockerhub) to their build context paths
+                    def servicesToBuild = [
+                        'login-service': 'login_service',
+                        'self-discovery-service': 'self_discovery_service',
+                        'coping-with-crisis-service': 'Coping_with_services', // Corrected path from compose file context
+                        'self-help-service': 'selfHelp',           // Corrected path from compose file context
+                        'letter-service': 'letters_Service',     // Corrected path from compose file context
+                        'frontend': 'mentalhealthapp'         // Corrected path from compose file context
+                    ]
+
+                    for (serviceName in servicesToBuild.keySet()) {
+                        def contextPath = servicesToBuild[serviceName]
+                        def fullImageName = "${DOCKER_HUB_USER}/${serviceName}:${IMAGE_TAG}"
+                        // Use --tag directly during build for simplicity
+                        sh "docker build -t ${fullImageName} ${contextPath}"
+                    }
                 }
             }
         }
@@ -29,51 +52,64 @@ pipeline {
         stage('Push Docker Images') {
             steps {
                 script {
-                    docker.withRegistry('', 'DockerHubCred') {
-                        def images = [
-                          'healsphere-login-service': 'login_service',
-                          'healsphere-self-discovery-service': 'self_discovery_service',
-                          'healsphere-coping-with-crisis-service': 'coping_with_services',
-                          'healsphere-self-help-service': 'self_help_service',
-                          'healsphere-letter-service': 'letter_service',
-                          'healsphere-frontend': 'frontend'
-                        ]
-                        
-                        for (actualImage in images.keySet()) {
-                          def dockerHubName = "${DOCKER_HUB_USER}/${images[actualImage]}"
-                          sh "docker tag ${actualImage}:latest ${dockerHubName}:${IMAGE_TAG}"
-                          sh "docker push ${dockerHubName}:${IMAGE_TAG}"
-                        }
+                    // Use the same service names as the build stage keys
+                    def servicesToPush = [
+                        'login-service',
+                        'self-discovery-service',
+                        'coping-with-crisis-service',
+                        'self-help-service',
+                        'letter-service',
+                        'frontend'
+                    ]
 
+                    // Assuming DockerHubCred is setup in Jenkins Credentials
+                    docker.withRegistry('https://index.docker.io/v1/', 'DockerHubCred') {
+                        for (serviceName in servicesToPush) {
+                          def fullImageName = "${DOCKER_HUB_USER}/${serviceName}:${IMAGE_TAG}"
+                          sh "docker push ${fullImageName}"
+                        }
                     }
                 }
             }
         }
 
-        stage('Run Ansible Playbook') {
+        
+
+
+        stage('Deploy to Kubernetes via Ansible') {
             steps {
-                script {
-                    withEnv(["ANSIBLE_HOST_KEY_CHECKING=False"]) {
+                // Force UTF-8 locale AND specify collections path (singular)
+                withEnv([
+                    "LANG=en_US.UTF-8",
+                    "LC_ALL=en_US.UTF-8",
+                    "ANSIBLE_COLLECTIONS_PATH=/usr/share/ansible/collections" // Corrected to singular
+                ]) {
+                    script {
+                        echo "--- Running Ansible with forced UTF-8 locale and collections path ---"
+                        def absoluteManifestPath = "${env.WORKSPACE}/k8s"
+                        echo "Manifest path being passed to Ansible: ${absoluteManifestPath}"
+
                         ansiblePlaybook(
-                            playbook: 'deploy.yml',
-                            inventory: 'inventory'
+                            playbook: 'deploy-k8s.yml',
+                            inventory: 'inventory-k8s',
+                            extras: "-e k8s_manifest_path=${absoluteManifestPath} -e k8s_namespace=${env.K8S_NAMESPACE}"
                         )
                     }
-                }
+                } // End withEnv
             }
         }
     }
 
     post {
         success {
-            mail to: 'kanan.gupta@iiitb.ac.in',
-                subject: "✅ HealSphere Deployment SUCCESS",
-                body: "The HealSphere app was deployed successfully!"
+            mail to: 'kanan.gupta@iiitb.ac.in', // Keep your notification email
+                subject: "✅ [K8s] HealSphere Deployment SUCCESS",
+                body: "The HealSphere app was deployed successfully to Kubernetes namespace ${env.K8S_NAMESPACE}!"
         }
         failure {
-            mail to: 'kanan.gupta@iiitb.ac.in',
-                subject: "❌ HealSphere Deployment FAILED",
-                body: "The HealSphere deployment failed. Please check Jenkins logs."
+            mail to: 'kanan.gupta@iiitb.ac.in', // Keep your notification email
+                subject: "❌ [K8s] HealSphere Deployment FAILED",
+                body: "The HealSphere Kubernetes deployment failed. Please check Jenkins logs (${env.BUILD_URL})."
         }
         always {
             cleanWs()
