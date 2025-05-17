@@ -85,16 +85,39 @@ pipeline {
                     "ANSIBLE_COLLECTIONS_PATH=/usr/share/ansible/collections" // Corrected to singular
                 ]) {
                     script {
-                        echo "--- Running Ansible with forced UTF-8 locale and collections path ---"
-                        def absoluteManifestPath = "${env.WORKSPACE}/k8s"
-                        echo "Manifest path being passed to Ansible: ${absoluteManifestPath}"
+                        echo "--- Running Ansible for App and ELK deployments ---"
+                        def absoluteAppManifestPath = "${env.WORKSPACE}/${env.APP_K8S_MANIFEST_PATH}"
+                        def absoluteElkManifestPath = "${env.WORKSPACE}/${env.ELK_K8S_MANIFEST_PATH}"
+
+                        echo "App Manifest path: ${absoluteAppManifestPath}"
+                        echo "ELK Manifest path: ${absoluteElkManifestPath}"
+                        echo "App Namespace: ${env.APP_K8S_NAMESPACE}"
+                        echo "ELK Namespace: ${env.ELK_K8S_NAMESPACE}"
+
+                        
+                    // --- BEGIN DEBUG ---
+                    echo "Listing contents of ELK manifest directory: ${absoluteElkManifestPath}"
+                    sh "ls -la ${absoluteElkManifestPath}" // <<< ADD THIS LINE BACK
+                    // --- END DEBUG ---
+
 
                         ansiblePlaybook(
                             playbook: 'deploy-k8s.yml',
                             inventory: 'inventory-k8s',
-                            extras: "-e k8s_manifest_path=${absoluteManifestPath} -e k8s_namespace=${env.K8S_NAMESPACE}"
+                            extras: "-e app_k8s_manifest_path=${absoluteAppManifestPath} -e app_k8s_namespace=${env.APP_K8S_NAMESPACE} -e elk_k8s_manifest_path=${absoluteElkManifestPath} -e elk_k8s_namespace=${env.ELK_K8S_NAMESPACE}"
                         )
                     }
+                    // script {
+                    //     echo "--- Running Ansible with forced UTF-8 locale and collections path ---"
+                    //     def absoluteManifestPath = "${env.WORKSPACE}/k8s"
+                    //     echo "Manifest path being passed to Ansible: ${absoluteManifestPath}"
+
+                    //     ansiblePlaybook(
+                    //         playbook: 'deploy-k8s.yml',
+                    //         inventory: 'inventory-k8s',
+                    //         extras: "-e k8s_manifest_path=${absoluteManifestPath} -e k8s_namespace=${env.K8S_NAMESPACE}"
+                    //     )
+                    // }
                 } // End withEnv
             }
         }
@@ -104,7 +127,7 @@ pipeline {
         success {
             mail to: 'kanan.gupta@iiitb.ac.in', // Keep your notification email
                 subject: "✅ [K8s] HealSphere Deployment SUCCESS",
-                body: "The HealSphere app was deployed successfully to Kubernetes namespace ${env.K8S_NAMESPACE}!"
+                body: "The HealSphere app and ELK stack were deployed successfully!"
         }
         failure {
             mail to: 'kanan.gupta@iiitb.ac.in', // Keep your notification email
