@@ -4,26 +4,62 @@
   gather_facts: false 
   connection: local  
 
-  # These vars will be overridden by -e from Jenkins if provided
-  vars:
-    k8s_manifest_path: "{{ lookup('env', 'WORKSPACE') }}/MIndNotes/k8s" # Default path relative to workspace - Jenkins should pass absolute path
-    k8s_namespace: "mindnotes" # Default namespace
-
   tasks:
    
     # --- Task using kubectl command to apply manifests ---
-    - name: Apply all K8s manifests using kubectl
+    - name: Apply HealSphere Application, Filebeat SA, and Filebeat CM
       ansible.builtin.command:
         # Use kubectl apply -k if you have a kustomization.yaml
         # Use kubectl apply -f for applying a directory of yaml files
-        cmd: "kubectl apply -n {{ k8s_namespace }} -f {{ k8s_manifest_path }}"
-      register: kubectl_apply_result
-      changed_when: "'configured' in kubectl_apply_result.stdout or 'created' in kubectl_apply_result.stdout"
-      failed_when: kubectl_apply_result.rc != 0
+        cmd: "kubectl apply -n {{ app_k8s_namespace }} -f {{ app_k8s_manifest_path }}"
+      register: app_kubectl_apply_result
+      changed_when: "'configured' in app_kubectl_apply_result.stdout or 'created' in app_kubectl_apply_result.stdout"
+      failed_when: app_kubectl_apply_result.rc != 0
 
-    - name: Show kubectl apply results
+    - name: Show HealSphere App, SA, CM kubectl apply results
       ansible.builtin.debug:
-        var: kubectl_apply_result.stdout_lines
-        verbosity: 1 # Show only if -v is used
+        var: app_kubectl_apply_result.stdout_lines
+        verbosity: 1
 
+    - name: Apply ELK Stack K8s manifests (ES and Kibana components)
+      ansible.builtin.command:
+        # This applies MIndNotes/k8s-elk/00- to MIndNotes/k8s-elk/05- to the 'elk' namespace
+        # It will also attempt to apply 08- and 09- but -n elk is ignored for cluster-scoped resources.
+        cmd: "kubectl apply -n {{ elk_k8s_namespace }} -f {{ elk_k8s_manifest_path }}"
+      register: elk_kubectl_apply_result
+      changed_when: "'configured' in elk_kubectl_apply_result.stdout or 'created' in elk_kubectl_apply_result.stdout"
+      failed_when: elk_kubectl_apply_result.rc != 0
+
+    - name: Show ELK Stack kubectl apply results
+      ansible.builtin.debug:
+        var: elk_kubectl_apply_result.stdout_lines
+        verbosity: 1
+
+    # The ClusterRole and ClusterRoleBinding might have already been applied by the task above
+    # because kubectl apply -f on a directory applies all files.
+    # However, applying them again explicitly ensures they are configured if they weren't,
+    # and kubectl apply is idempotent. These are cluster-scoped, so -n is not strictly needed.
+    - name: Apply Filebeat ClusterRole (ensure it exists)
+      ansible.builtin.command:
+        cmd: "kubectl apply -f {{ elk_k8s_manifest_path }}/08-filebeat-clusterrole.yaml"
+      register: cr_apply_result
+      changed_when: "'configured' in cr_apply_result.stdout or 'created' in cr_apply_result.stdout"
+      failed_when: cr_apply_result.rc != 0
+
+    - name: Show Filebeat ClusterRole apply results
+      ansible.builtin.debug:
+        var: cr_apply_result.stdout_lines
+        verbosity: 1
+
+    - name: Apply Filebeat ClusterRoleBinding (ensure it exists)
+      ansible.builtin.command:
+        cmd: "kubectl apply -f {{ elk_k8s_manifest_path }}/09-filebeat-clusterrolebinding.yaml"
+      register: crb_apply_result
+      changed_when: "'configured' in crb_apply_result.stdout or 'created' in crb_apply_result.stdout"
+      failed_when: crb_apply_result.rc != 0
+
+    - name: Show Filebeat ClusterRoleBinding apply results
+      ansible.builtin.debug:
+        var: crb_apply_result.stdout_lines
+        verbosity: 1
   
