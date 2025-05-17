@@ -1,0 +1,23 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: filebeat
+  labels:
+    app: filebeat
+rules:
+- apiGroups: [""] # Core API group
+  resources:
+  - namespaces
+  - pods
+  - nodes # Added permission for nodes
+  verbs:
+  - get
+  - watch
+  - list
+- apiGroups: ["apps"] # For deployments, statefulsets if needed by specific autodiscover configs
+  resources:
+  - replicasets # Needed to get Pod controller information
+  verbs:
+  - get
+  - watch
+  - list
