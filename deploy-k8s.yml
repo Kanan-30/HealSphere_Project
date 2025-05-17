@@ -1,8 +1,8 @@
 ---
 - name: Deploy HealSphere App to Kubernetes
-  hosts: localhost # Target localhost defined in inventory-k8s
-  gather_facts: false # Not needed for K8s tasks
-  connection: local  # Use local connection
+  hosts: localhost 
+  gather_facts: false 
+  connection: local  
 
   # These vars will be overridden by -e from Jenkins if provided
   vars:
