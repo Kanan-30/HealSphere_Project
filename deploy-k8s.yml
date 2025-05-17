@@ -10,6 +10,7 @@
     k8s_namespace: "mindnotes" # Default namespace
 
   tasks:
+   
     # --- Task using kubectl command to apply manifests ---
     - name: Apply all K8s manifests using kubectl
       ansible.builtin.command:
@@ -24,3 +25,5 @@
       ansible.builtin.debug:
         var: kubectl_apply_result.stdout_lines
         verbosity: 1 # Show only if -v is used
+
+  
