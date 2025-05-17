@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kibana-deployment
+  namespace: elk 
+  labels:
+    app: kibana
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kibana
+  template:
+    metadata:
+      labels:
+        app: kibana
+    spec:
+      containers:
+      - name: kibana
+        image: docker.elastic.co/kibana/kibana:8.12.2
+        ports:
+        - containerPort: 5601
+          name: http
+        env:
+        - name: ELASTICSEARCH_HOSTS
+          value: "http://elasticsearch-service.elk.svc.cluster.local:9200" # Assumes ES is in 'elk' namespace
+          # If ES is in 'mindnotes' namespace: "http://elasticsearch-service.mindnotes.svc.cluster.local:9200"
+          # If ES is in same namespace as Kibana: "http://elasticsearch-service:9200"
+        readinessProbe:
+          httpGet:
+            path: /api/status
+            port: 5601
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /api/status
+            port: 5601
+          initialDelaySeconds: 90
+          periodSeconds: 20
