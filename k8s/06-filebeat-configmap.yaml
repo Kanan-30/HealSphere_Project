@@ -1,0 +1,29 @@
+# MIndNotes/k8s/06-filebeat-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: filebeat-config
+  namespace: mindnotes
+  labels:
+    app: filebeat
+data:
+  filebeat.yml: |
+    # Using autodiscover as it's generally better for Kubernetes
+    filebeat.autodiscover:
+      providers:
+        - type: kubernetes
+          node: ${NODE_NAME}
+          hints.enabled: true
+          hints.default_config:
+            type: container
+            paths:
+              - /var/log/containers/*${data.kubernetes.container.id}.log
+
+    processors:
+      - add_kubernetes_metadata:
+          in_cluster: true
+          node: ${NODE_NAME}
+
+    output.elasticsearch:
+      hosts: ["http://elasticsearch-service.elk.svc.cluster.local:9200"]
+      # NO 'index:' line here, or ensure it's commented out to use Filebeat default
